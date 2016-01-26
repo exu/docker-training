@@ -1,0 +1,11 @@
+www:
+    # container_name: www
+    image: php:7-apache
+    net: training1
+
+sql:
+    # container_name: sql
+    image: mysql:latest
+    net: training1
+    environment:
+        MYSQL_ROOT_PASSWORD: root

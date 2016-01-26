@@ -1,4 +1,4 @@
-# Docker training
+# Docker training basics for dev worklows
 
 ## TODO Intro
 
@@ -24,19 +24,27 @@
 
 run ubuntu with sth..
 
-    docker run ubuntu cat /etc/passwd
-    docker run ubuntu apt-get
-    docker run -it ubuntu /bin/bash
+```
+docker run ubuntu cat /etc/passwd
+docker run ubuntu apt-get
+docker run -it ubuntu /bin/bash
+```
 
 ## Creating First container
 
 -   Shell app
 
-    FROM ubuntu:latest
-    CMD date
+Add lines to `Dockerfile`
+```
+FROM ubuntu:latest
+CMD date
+```
+next you'll need to run
 
-    docker build -t mybuntu .
-    docker run -r mybuntu
+```
+docker build -t mybuntu .
+docker run -r mybuntu
+```
 
 -   Change to webapp
 
@@ -46,10 +54,16 @@ run ubuntu with sth..
 
 ## Same with docker compose
 
+
+
 ## Networking
 
 ## Binding ports
 
 ## Localhost integration (--net=host)
 
-## Docker-compose scale
+## Linking containers
+
+networking
+
+## playing with Docker-compose scale
