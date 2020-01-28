@@ -1,3 +1,50 @@
+# What's Docker 
+
+## Containers intro (container vs VMs)
+## Docker service 
+## Docker containers repository 
+## Docker images as layers
+
+# Docker examples
+
+## Simple first run [Dockerfile](001-simple-dockerfile/Dockerfile)
+
+- Building with `docker build -t TAG_NAME`.
+- Running  with `docker run TAG_NAME
+
+
+## Entrypoints [Dockerfile](002-entrypoint/Dockerfile)
+
+Default entrypoing in docker is `/bin/sh -c` which simply runs command passed to `CMD` instruction
+
+
+## Inserting editor inside docker 
+
+You can run almost all applications / services in Docker it's encapsulated OS.
+
+## Docker images (ubuntu vs alpine vs debian vs scratch)
+
+You need be careful in your choice of base docker image they can be huge, and you for sure don't want to pass so big images through your network.
+
+
+## Docker containers are immutable 
+
+If you change something in your docker images it'll simply lost after docker container 
+will be reloaded. 
+
+## Attaching volumes
+
+## Creating Web app 
+### Golang based (app server)
+### PHP based application
+
+## Exposing application
+
+
+
+
+
+
 # Docker training basics for dev worklows
 
 We will be talking today about web based applications:
