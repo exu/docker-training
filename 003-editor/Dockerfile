@@ -4,6 +4,6 @@ RUN mkdir /workspace
 WORKDIR /workspace
 
 RUN apt-get update
-RUN apt-get install -y emacs-nox
+RUN apt-get install -y emacs-nox vim
 
-CMD emacs
+CMD "vim"

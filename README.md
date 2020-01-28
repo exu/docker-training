@@ -1,92 +1,21 @@
 # What's Docker 
 
-## Containers intro (container vs VMs)
-## Docker service 
-## Docker containers repository 
-## Docker images as layers
+## Docker architecture
 
-# Docker examples
+[![img](res/docker-architecture.svg)](res/docker-architecture.svg)
 
-## Simple first run [Dockerfile](001-simple-dockerfile/Dockerfile)
+Docker parts: 
+- *Docker daemon* - manages docker objects
+- *Docker client* - cli for interacting with docker
+- *Docker registries* - stores docker images
+- *Docker objects* - when interacting with Docker you're managing objects. There are several types of objects
+  - *Images* - template with instructions how to create docker container
+  - *Containers* - is a runnable instance of an _Image_
+  - *networks*, 
+  - *volumes*, 
+  - *plugins*, 
 
-- Building with `docker build -t TAG_NAME`.
-- Running  with `docker run TAG_NAME
-
-
-## Entrypoints [Dockerfile](002-entrypoint/Dockerfile)
-
-Default entrypoing in docker is `/bin/sh -c` which simply runs command passed to `CMD` instruction
-
-
-## Inserting editor inside docker 
-
-You can run almost all applications / services in Docker it's encapsulated OS.
-
-## Docker images (ubuntu vs alpine vs debian vs scratch)
-
-You need be careful in your choice of base docker image they can be huge, and you for sure don't want to pass so big images through your network.
-
-
-## Docker containers are immutable 
-
-If you change something in your docker images it'll simply lost after docker container 
-will be reloaded. 
-
-## Attaching volumes
-
-## Creating Web app 
-### Golang based (app server)
-### PHP based application
-
-## Exposing application
-
-
-
-
-
-
-# Docker training basics for dev worklows
-
-We will be talking today about web based applications:
-Which of you have made some web applications?
-
-# Introduction
-
-There are so many possibilities to share your software to the world
-The most popular Cloud providers will create for You virtal machine
-images.
-
-For example when you're using Amazon / Google Cloud Engine / Digital
-Ocean you can easily request for creating new node, engine will spawn
-new Virtual Machine with OS of your choice and here you are you have
-separate Operating System connected to the Internet. These Machines
-are spawned on top of powerful servers with hardware virtualisation.
-
-Where is here place for Docker ? WTF is Docker? Maybe simple example:
-
-After create of such VM you can put your app and start your business
-next you out another app, and another and another.
-
-Let's name them app1 app2 app3, app1 have some dependency e.g. ssh-server
-in version 1.1 but app2 want ssh-server in version 2.0 and SSL version 2.0 because of many
-other dependencies there is no way for your OS to handle such deps tree
-app3 want ssh-server version 3.0 and ssl version 1.0. Things are getting
-little messy (and it's only 2 deps with 3 different versions)
-
-Imagine that you can put app1 isolate it in
-her own environment giv her ssh-server in
-version 1.1 and SSL in 2.0.
-
-You can do it of course with VMs but, VMs are resource heavy,
-big, and sharing them by network is hard.
-
-And here comes Docker.
-
-
-# Docker basics
-
-
-1.  Docker basics
+## Why Docker? It's all about standards and resource utilisation.
 
 -   VM vs containers
 
@@ -94,21 +23,10 @@ And here comes Docker.
 
 [![img](res/docker-training-containers.png)](res/docker-training-containers.png)
 
-2.  Structure: Images vs containers
 
-- Image: like class in programming
-- Container: Instance
+# Hands on Docker examples
 
-We're storing, pushing, changing classes, but not runned instances
-(we need to rebuild, in most programming langs :) )
-
-3. File system
-
-File system in docker containers is temporary by default (exception here are data volumes. When you stop container and start again all data will be lost
-same will happen with new instance of class in OOP. Persistance here is made
-on building process.
-
-3.  Containers Repository
+## Docker Repositories
 
 There is huge containers repository with official and unofficial images,
 here you can find many of prebuild container images with different linux
@@ -119,9 +37,10 @@ systems and many many more.
 
 now let's run some containers
 
-# Running existing containers
+### Running existing containers
 
-But how containers work? How you need to handle them. Let's start with really simple
+But how containers work? Let's start with really simple
+
 example:
 
 run ubuntu with sth..
@@ -131,6 +50,89 @@ docker run ubuntu cat /etc/passwd
 docker run ubuntu apt-get
 docker run -it ubuntu /bin/bash
 ```
+
+What's happen when you're running docker containers?
+
+
+## Simple first run [Dockerfile](001-simple-dockerfile/Dockerfile)
+
+- Building with `docker build -t TAG_NAME`.
+- Running  with `docker run TAG_NAME`
+
+
+## Entrypoints [Dockerfile](002-entrypoint/Dockerfile)
+
+Default entrypoing in docker is `/bin/sh -c` which simply runs command passed to `CMD` instruction
+
+
+## Inserting editor inside docker [Dockerfile](003-editor/Dockerfile)
+ 
+You can run almost all applications / services in Docker. But sometimes you'll 
+need to attach TTY to your docker container 
+
+- build with `docker build -t editor` 
+- run with `docker run -it editor`
+
+## Docker images (ubuntu vs alpine vs debian vs scratch)
+
+You need be careful in your choice of base docker image - they can be huge, 
+and you for sure don't want to pass so big images through your network.
+
+Please run image based on `ubuntu` next run one based on `alpine` 
+
+next check: 
+
+```
+docker images
+```
+
+
+## Docker containers are immutable 
+
+File system in docker containers is temporary by default (exception here are data volumes). 
+When you stop container and start again all data will be lost same will happen with new instance of class in OOP. Persistance here is made on building process.
+
+If you change something in your docker images it'll simply lost after docker container will be reloaded. 
+
+Example - [Dockerfile](050-small-images-alpine/Dockerfile)
+
+## Attaching volumes
+
+If you want to persist your data you'll need to use volumes - it's like attaching new disk 
+to your PC. You can attach multiple volumes to multiple directories.
+
+
+
+
+
+
+
+
+## Creating Web app 
+### Golang based (app server)
+### PHP based application
+
+## Exposing application
+
+
+
+# Docker ecosystem
+
+## Containers repositories 
+
+
+
+
+
+
+
+
+
+
+3. File system
+
+3.  Containers Repository
+
 
 # Creating First container with CMD
 
