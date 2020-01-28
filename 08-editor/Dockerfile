@@ -4,6 +4,6 @@ RUN mkdir /workspace
 WORKDIR /workspace
 
 RUN apt-get update
-RUN apt-get install -y emacs24-nox
+RUN apt-get install -y emacs-nox
 
 CMD emacs

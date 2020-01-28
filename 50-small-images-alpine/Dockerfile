@@ -1,3 +1,3 @@
-FROM gliderlabs/alpine:3.3
+FROM alpine:3.11.3
 RUN apk add --no-cache mysql-client
 ENTRYPOINT ["mysql"]

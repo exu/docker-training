@@ -5,37 +5,10 @@ Which of you have made some web applications?
 
 # Introduction
 
-Ok, now We try to introduce several terms which could be useful in your
-future job as web developers (and probably not only web):
-
-- Example HA architecture
-
-- WWW servers
-- Aplication servers
-- Load balancers
-- Service discovery
-- Storage servers (SQL, Doc, Graph, KV databases)
-- Workers
-- Scheduled Jobs
-- Command line applications
-- Data Migrations
-
-
-Probably you want to ask how it looks in our company?
-- MEL, prod, 1 700 000 users in db:
-  + We're using Amazon services
-  + 2 Load balancers
-  + 20 app servers
-  + 4 new queue workers
-  + 4 old queue workers
-  + Amazon RDS (MySQL like database)
-  + MongoDB cluster (3 nodes)
-  + Redis nodes
-
-
 There are so many possibilities to share your software to the world
 The most popular Cloud providers will create for You virtal machine
 images.
+
 For example when you're using Amazon / Google Cloud Engine / Digital
 Ocean you can easily request for creating new node, engine will spawn
 new Virtual Machine with OS of your choice and here you are you have
@@ -49,7 +22,7 @@ next you out another app, and another and another.
 
 Let's name them app1 app2 app3, app1 have some dependency e.g. ssh-server
 in version 1.1 but app2 want ssh-server in version 2.0 and SSL version 2.0 because of many
-other dependencies there is no way for your OS to habdle such deps tree
+other dependencies there is no way for your OS to handle such deps tree
 app3 want ssh-server version 3.0 and ssl version 1.0. Things are getting
 little messy (and it's only 2 deps with 3 different versions)
 
@@ -71,7 +44,8 @@ And here comes Docker.
 -   VM vs containers
 
 [![img](res/docker-training-vm.png)](res/docker-training-vm.png)
-        [![img](res/docker-training-containers.png)](res/docker-training-containers.png)
+
+[![img](res/docker-training-containers.png)](res/docker-training-containers.png)
 
 2.  Structure: Images vs containers
 
@@ -79,7 +53,7 @@ And here comes Docker.
 - Container: Instance
 
 We're storing, pushing, changing classes, but not runned instances
-(we need to rebuild)
+(we need to rebuild, in most programming langs :) )
 
 3. File system
 
