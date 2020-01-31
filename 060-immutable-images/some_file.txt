@@ -1,0 +1,3 @@
+Some file content
+And another line
+and one more

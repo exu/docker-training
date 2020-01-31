@@ -93,6 +93,7 @@ docker run cmd ls -la
 - Running  with `docker run TAG_NAME`
 
 
+
 ## Entrypoints [Dockerfile](002-entrypoint/Dockerfile)
 
 Default entrypoing in docker is `/bin/sh -c` which simply runs command passed to `CMD` instruction
@@ -116,8 +117,6 @@ docker run ep --date='@1417400000'
 ```
 
 
-
-
 ## Inserting editor inside docker [Dockerfile](003-editor/Dockerfile)
  
 You can run almost all applications / services in Docker. But sometimes you'll 
@@ -131,19 +130,117 @@ need to attach TTY to your docker container
 You need be careful in your choice of base docker image - they can be huge, 
 and you for sure don't want to pass so big images through your network.
 
-Please run image based on `ubuntu` next run one based on `alpine` 
+Please build image based on `ubuntu` next run one based on `alpine` images
 
-```
-docker run -it ubuntu /bin/sh
-docker run -it alpine /bin/sh
-```
+``` Dockerfile
+FROM alpine:3
 
-next check: 
+RUN apk add curl
 
-```
-docker images
+CMD curl ifconfig.co
 ```
 
+``` Dockerfile
+FROM ubuntu:latest
+
+RUN apt update          # ubuntu doesn't update package urls by default
+RUN apt install -y curl
+
+CMD curl ifconfig.co
+```
+
+
+``` sh
+docker build -t size-ubuntu -f Dockerfile.ubuntu .
+docker build -t size-alpine -f Dockerfile.alpine .
+```
+
+Next check `docker images` command to check image size:
+
+``` sh
+docker images | head -n 5
+```
+
+
+
+## Long running processes in Docker
+
+Recently our all examples was for running single run commands which ends their
+life after execution. But often we'll be dealing with images which have some
+long running processes. 
+
+For this example we'll lock our Docker Image with some simple `sleep` command
+
+``` Dockerfile
+FROM alpine:3 
+
+CMD ["tail", "-f", "/dev/stdout"] # tail -f will output if new lines will be
+                                  # available and it'll lock our process
+```
+
+``` sh
+docker build -t tail . 
+docker run -it tail
+```
+
+Now we can go to new Terminal and check what's going on with that process.
+
+``` sh
+docker ps
+
+# command output
+CONTAINER ID        IMAGE               COMMAND                 CREATED             STATUS              PORTS               NAMES
+72532d002a16        long                "tail -f /dev/stdout"   7 seconds ago       Up 6 seconds                            elegant_kilby
+01029e402dde        ubuntu              "/bin/sh"               30 minutes ago      Up 30 minutes                           optimistic_morse
+
+```
+
+as we can se on my machine example output shows that there are two images:
+- first was created 7 seconds ago
+- second was run 30 minutes ago
+- please notice that docker generetes random `NAME` for each container 
+
+now we can check whats going on our run container
+
+``` sh
+#              attach terminal from our container
+#             /
+docker exec -it 72532d002a16 /bin/sh
+#                    /            \ 
+#               conainer ID      command 
+#               or name
+```
+
+`docker exec` runs command inside working container
+we're running here shell inside container (`-it` is needed to attach our shell
+to docker shell)
+
+## Named conainers
+
+Running `docker exec` with conintaer ID passed (or random name) could be quite inconvinient - but there
+is a nice option when running containers `--name` which sets a custom name for
+container. 
+
+``` sh
+docker run --rm --name tailer tail
+```
+
+``` sh
+docker ps 
+
+$ docker ps 
+CONTAINER ID        IMAGE               COMMAND                 CREATED             STATUS              PORTS               NAMES
+8954e7811347        tail                "tail -f /dev/stdout"   6 seconds ago       Up 5 seconds                            tailer
+
+```
+
+as we can see that container `NAME` is set, now we can use it instead of ID's
+
+e.g. 
+
+``` sh
+docker exec -it tailer /bin/sh
+```
 
 ## Docker containers are immutable 
 
@@ -152,7 +249,63 @@ When you stop container and start again all data will be lost same will happen w
 
 If you change something in your docker images it'll simply lost after docker container will be reloaded. 
 
-Example - [Dockerfile](050-small-images-alpine/Dockerfile)
+``` sh
+echo "some file" >> some_file.txt
+echo "content" >> some_file.txt
+echo "and more content" >> some_file.txt
+```
+
+``` Dockerfile
+FROM alpine:3
+COPY some_file.txt /
+CMD tail -f /some_file.txt
+```
+
+``` sh
+docker build -t immutable .
+docker run -it --name im1 --rm immutable
+```
+
+next you can modify content of this container from other terminal session
+
+``` sh
+docker exec -it im1 /bin/sh
+```
+
+and add some files to our `some_file.txt` inside container
+
+``` sh
+/ \# echo "another line" >> /some_file.txt
+/ \# echo "another line" >> /some_file.txt
+/ \# echo "another line" >> /some_file.txt
+/ \# echo "another line" >> /some_file.txt
+/ \# echo "another line" >> /some_file.txt
+```
+
+as you can see on first terminal our file got new lines - file was modified
+
+Now let's restart our container
+
+``` sh
+docker kill im1
+docker run --rm --name im1 immutable
+```
+
+Let's get to it's shell again:
+``` sh
+docker exec -it im1 /bin/sh
+```
+
+
+``` sh
+/ \# cat /some_file.txt
+some file
+content
+and more content
+```
+as we can see after container restart file is not changed
+
+Example - [Dockerfile](060-immutable-images/Dockerfile)
 
 ## Attaching volumes
 
@@ -195,31 +348,11 @@ http://172.17.0.4:8080/allaallalal
 
 
 
-# Docker ecosystem
-
-## Containers repositories 
 
 
 
 
 
-
-
-
-
-
-3. File system
-
-3.  Containers Repository
-
-
-# Creating First container with CMD
-
--   Shell app
-
-
-
-# Default program to run ENTRYPOINT
 
 
 
@@ -354,7 +487,7 @@ You can use micro base images:
 
 
 # playing with Docker-compose scale
-
+  
 # Scaling single-core apps with static docker config
 
 - http://blog.hypriot.com/post/docker-compose-nodejs-haproxy/

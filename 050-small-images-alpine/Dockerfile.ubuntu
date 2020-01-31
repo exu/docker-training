@@ -1,0 +1,6 @@
+FROM ubuntu:latest
+
+RUN apt update          # ubuntu doesn't update package urls by default
+RUN apt install -y curl
+
+CMD curl ifconfig.co
