@@ -52,9 +52,42 @@ docker run -it ubuntu /bin/bash
 ```
 
 What's happen when you're running docker containers?
+- first docker will check if there is image which you want to run available
+- if it is not it'll check if there are parts of images available 
+- if not it downloads all needed parts of image 
+- docker starts your image with given `cmd` (last passed parameter in examples
+  above)
 
 
 ## Simple first run [Dockerfile](001-simple-dockerfile/Dockerfile)
+
+Running images with command line is good when you want to check or debug
+something quickly, but the main purpose of Docker is to make your application 
+to be immutable with all dependencies (the system libs too)
+
+To define such image you'll need some DSL. `Dockerfile` is such DSL in Docker.
+
+Simplest Dockerfile could look like this: 
+
+first create new Dockerfile `touch Dockerfile`
+
+Add lines to `Dockerfile`
+```
+FROM ubuntu:latest
+CMD date
+```
+next you'll need to build your image from Dockerfile and run built image.
+
+```
+docker build -t cmd .
+docker run cmd
+```
+
+When we pass additional parameters We override CMD section.
+
+```
+docker run cmd ls -la
+```
 
 - Building with `docker build -t TAG_NAME`.
 - Running  with `docker run TAG_NAME`
@@ -63,6 +96,26 @@ What's happen when you're running docker containers?
 ## Entrypoints [Dockerfile](002-entrypoint/Dockerfile)
 
 Default entrypoing in docker is `/bin/sh -c` which simply runs command passed to `CMD` instruction
+
+
+We can set entrypoint for our app (default is `/bin/sh -c`)
+`CMD` will be appended.
+
+```
+FROM ubuntu:latest
+
+ENTRYPOINT ["date", "-R"]
+CMD ["-u"]
+```
+
+you can override command passing additional parameters after run:
+
+```
+docker build -t ep .
+docker run ep --date='@1417400000'
+```
+
+
 
 
 ## Inserting editor inside docker [Dockerfile](003-editor/Dockerfile)
@@ -79,6 +132,11 @@ You need be careful in your choice of base docker image - they can be huge,
 and you for sure don't want to pass so big images through your network.
 
 Please run image based on `ubuntu` next run one based on `alpine` 
+
+```
+docker run -it ubuntu /bin/sh
+docker run -it alpine /bin/sh
+```
 
 next check: 
 
@@ -101,15 +159,36 @@ Example - [Dockerfile](050-small-images-alpine/Dockerfile)
 If you want to persist your data you'll need to use volumes - it's like attaching new disk 
 to your PC. You can attach multiple volumes to multiple directories.
 
+## Creating Simple PHP Web application
+
+## Getting our container IP address
+
+Ok we've run our web app, It's working but how to show it in browser? We'll need
+our container IP address:
+
+```
+docker inspect
+```
+
+We can filter inspected data with format parameter: 
+
+```
+docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $INSTANCE_ID
+```
+
+result:
+
+```
+172.17.0.4
+```
+
+http://172.17.0.4:8080/allaallalal
 
 
 
 
-
-
-
-## Creating Web app 
 ### Golang based (app server)
+
 ### PHP based application
 
 ## Exposing application
@@ -138,44 +217,9 @@ to your PC. You can attach multiple volumes to multiple directories.
 
 -   Shell app
 
-Add lines to `Dockerfile`
-```
-FROM ubuntu:latest
-CMD date
-```
-next you'll need to run
-
-```
-docker build -t cmd .
-docker run cmd
-```
-
-When we pass additional parameters We override CMD section.
-
-```
-docker run cmd ls -la
-```
-
 
 
 # Default program to run ENTRYPOINT
-
-We can set entrypoint for our app (default is `/bin/sh -c`)
-`CMD` will be appended.
-
-```
-FROM ubuntu:latest
-
-ENTRYPOINT ["date", "-R"]
-CMD ["-u"]
-```
-
-you can override command passing additional parameters after run:
-
-```
-docker build -t ep .
-docker run ep --date='@1417400000'
-```
 
 
 
@@ -225,50 +269,11 @@ docker run --name=gogo swa
 
 Now when we propagate container it'll be freezed inside it.
 
-# Getting our container IP address
-
-Ok we've run our web app, It's working but how to show it in browser? We'll need
-our container IP address:
-
-```
-docker inspect
-
-docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'
-
-```
-
-result:
-
-```
-172.17.0.4
-```
-
-http://172.17.0.4:8080/allaallalal
-
-
 # Data volumes
 
 I've said on beggining that docker has temporary file system by default.
 But what when you want to store some informations after container will
 be removed?
-
-
-## Mounting local path inside container for devlopment
-
-We can run our container with local volume mounted inside our container
-
-## Shared-storage Volumes
-
-We can also create docker based volumes which are responsible for
-saving data
-
-To do it we need to create data volume:
-
-```
-docker volume create --name our-data
-docker run -v our-data:/vol -it ubuntu /bin/bash
-```
-
 
 
 # PHP App with mysql
