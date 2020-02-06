@@ -26,7 +26,21 @@ Docker parts:
 
 
 
+
+
+
 # Hands on Docker examples
+
+```
+                    ##        .
+              ## ## ##       ==
+           ## ## ## ##      ===
+       /""""""""""""""""\___/ ===
+  ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
+       \______ o          __/
+         \    \        __/ 
+          \____\______/
+```
 
 ## Docker Repositories
 
@@ -313,7 +327,7 @@ Example - [Dockerfile](060-immutable-images/Dockerfile)
 If you want to persist your data you'll need to use volumes or mounts we'll look at volumes first. 
 It's like attaching new disk to your PC. You can attach multiple volumes to multiple directories.
 
-![mounts](res/types-of-mounts.png "mounts")
+![mounts](res/types-of-mounts-volume.png "mounts")
 
 There are two types of mounts
 - bind mount
@@ -392,7 +406,6 @@ docker run -it --mount source=vol1,destination=/mymount ubuntu /bin/sh
 - Named volues are a lot easier to use and backup
 - Originally, the -v or --volume flag was used for standalone containers and the --mount flag was used for swarm services. However, starting with Docker 17.06, you can also use --mount with standalone containers. In general, --mount is more explicit and verbose. The biggest difference is that the -v syntax combines all the options together in one field, while the --mount syntax separates them. Here is a comparison of the syntax for each flag.
 - New users should try --mount syntax which is simpler than --volume syntax.
-
 
 
 ### Bind mounts 
@@ -696,9 +709,41 @@ ONBUILD RUN /usr/local/bin/python-build --dir /app/src
 ```
 
 
+### `STOPSIGNAL`
+
+The STOPSIGNAL instruction sets the system call signal that will be sent to the
+container to exit. This signal can be a valid unsigned number that matches a
+position in the kernel’s syscall table, for instance 9, or a signal name in the
+format SIGNAME, for instance SIGKILL.
+
+### `HEALTHCHECK`
+
+``` Dockerfile
+HEALTHCHECK --interval=5m --timeout=3s \
+  CMD curl -f http://localhost/ || exit 1
+```
+
+To help debug failing probes, any output text (UTF-8 encoded) that the command
+writes on stdout or stderr will be **stored** in the **health status** and can be
+queried with docker inspect. Such output should be kept short (only the first
+4096 bytes are stored currently).
+
+
+
 
 
 # Creating applications
+
+```
+                    ##        .
+              ## ## ##       ==
+           ## ## ## ##      ===
+       /""""""""""""""""\___/ ===
+  ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
+       \______ o          __/
+         \    \        __/ 
+          \____\______/
+```
 
 
 ## Creating Simple PHP Web application
