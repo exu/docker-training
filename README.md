@@ -166,14 +166,14 @@ CMD curl ifconfig.co
 
 
 ``` sh
-docker build -t size-ubuntu -f Dockerfile.ubuntu .
-docker build -t size-alpine -f Dockerfile.alpine .
+$ docker build -t size-ubuntu -f Dockerfile.ubuntu .
+$ docker build -t size-alpine -f Dockerfile.alpine .
 ```
 
 Next check `docker images` command to check image size:
 
 ``` sh
-docker images | head -n 5
+$ docker images | head -n 5
 ```
 
 
@@ -194,14 +194,14 @@ CMD ["tail", "-f", "/dev/stdout"] # tail -f will output if new lines will be
 ```
 
 ``` sh
-docker build -t tail . 
-docker run -it tail
+$ docker build -t tail . 
+$ docker run -it tail
 ```
 
 Now we can go to new Terminal and check what's going on with that process.
 
 ``` sh
-docker ps
+$ docker ps
 
 # command output
 CONTAINER ID        IMAGE               COMMAND                 CREATED             STATUS              PORTS               NAMES
@@ -219,8 +219,8 @@ now we can check whats going on our run container
 
 ``` sh
 #              attach terminal from our container
-#             /
-docker exec -it 72532d002a16 /bin/sh
+#               /
+$ docker exec -it 72532d002a16 /bin/sh
 #                    /            \ 
 #               conainer ID      command 
 #               or name
@@ -237,12 +237,10 @@ is a nice option when running containers `--name` which sets a custom name for
 container. 
 
 ``` sh
-docker run --rm --name tailer tail
+$ docker run --rm --name tailer tail
 ```
 
 ``` sh
-docker ps 
-
 $ docker ps 
 CONTAINER ID        IMAGE               COMMAND                 CREATED             STATUS              PORTS               NAMES
 8954e7811347        tail                "tail -f /dev/stdout"   6 seconds ago       Up 5 seconds                            tailer
@@ -254,7 +252,7 @@ as we can see that container `NAME` is set, now we can use it instead of ID's
 e.g. 
 
 ``` sh
-docker exec -it tailer /bin/sh
+$ docker exec -it tailer /bin/sh
 ```
 
 ## Docker containers are immutable 
@@ -277,24 +275,24 @@ CMD tail -f /some_file.txt
 ```
 
 ``` sh
-docker build -t immutable .
-docker run -it --name im1 --rm immutable
+$ docker build -t immutable .
+$ docker run -it --name im1 --rm immutable
 ```
 
 next you can modify content of this container from other terminal session
 
 ``` sh
-docker exec -it im1 /bin/sh
+$ docker exec -it im1 /bin/sh
 ```
 
 and add some files to our `some_file.txt` inside container
 
 ``` sh
-/ \# echo "another line" >> /some_file.txt
-/ \# echo "another line" >> /some_file.txt
-/ \# echo "another line" >> /some_file.txt
-/ \# echo "another line" >> /some_file.txt
-/ \# echo "another line" >> /some_file.txt
+$ echo "another line" >> /some_file.txt
+$ echo "another line" >> /some_file.txt
+$ echo "another line" >> /some_file.txt
+$ echo "another line" >> /some_file.txt
+$ echo "another line" >> /some_file.txt
 ```
 
 as you can see on first terminal our file got new lines - file was modified
@@ -302,18 +300,18 @@ as you can see on first terminal our file got new lines - file was modified
 Now let's restart our container
 
 ``` sh
-docker kill im1
-docker run --rm --name im1 immutable
+$ docker kill im1
+$ docker run --rm --name im1 immutable
 ```
 
 Let's get to it's shell again:
 ``` sh
-docker exec -it im1 /bin/sh
+$ docker exec -it im1 /bin/sh
 ```
 
 
 ``` sh
-/ \# cat /some_file.txt
+$ cat /some_file.txt
 some file
 content
 and more content
@@ -344,14 +342,14 @@ You can explicitly create new named volumes:
 
 - craete new volume
 ``` sh
-docker volume create myvol
+$ docker volume create myvol
 
 myvol
 ```
 
 - list created volumes
 ``` sh
-docker volume ls 
+$ docker volume ls 
 
 DRIVER              VOLUME NAME
 local               myvol                                                                                                                             
@@ -359,7 +357,7 @@ local               myvol
 
 - inspect volume
 ``` sh
-docker volume inspect myvol
+$ docker volume inspect myvol
 
 [                                                                                                                                                     
     {                                                                                                                                                 
@@ -376,7 +374,7 @@ docker volume inspect myvol
 
 - rm created volume
 ``` sh
-docker volume rm myvol 
+$ docker volume rm myvol 
 
 myvol
 ```
@@ -385,12 +383,12 @@ myvol
 ### Attaching volumes to conainer
 
 ``` sh
-docker volume create vol1
+$ docker volume create vol1
 ```
 
 
 ``` sh
-docker run -d \
+$ docker run -d \
   --name devtest \
   --mount source=vol1,target=/app \
   nginx:latest
@@ -399,7 +397,7 @@ docker run -d \
 Next lets run another container which will use our volume.
 
 ``` sh
-docker run -it --mount source=vol1,destination=/mymount ubuntu /bin/sh
+$ docker run -it --mount source=vol1,destination=/mymount ubuntu /bin/sh
 ```
 
 #### Some tips form docker site:
@@ -428,10 +426,10 @@ to bind mount directory from local filesystem use following command:
 
 ``` sh
 #                   need to be full path
-#                    /
-docker run -it -v $(pwd)/dirToMount:/whereToMountInContainer ubuntu
-#                            /           \
-#                        local          container 
+#                       /
+$ docker run -it -v $(pwd)/dirToMount:/whereToMountInContainer ubuntu
+#                              /           \
+#                            local          container 
 ```
 
 local dir will bin bound to container
