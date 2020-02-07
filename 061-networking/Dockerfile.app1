@@ -1,0 +1,3 @@
+FROM php:7-apache
+
+ADD app1.php /var/www/html/index.php

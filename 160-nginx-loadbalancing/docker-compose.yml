@@ -1,3 +1,0 @@
-app:
-    image: app
-    net: training1

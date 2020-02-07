@@ -1,0 +1,22 @@
+version: '2'
+
+services:
+    web:
+        image: nginx:latest
+        ports:
+            - "8080:80"
+        volumes:
+            - ./src:/src
+            - ./default.conf:/etc/nginx/conf.d/default.conf
+        networks:
+            - php-fpm
+    php:
+        image: php:fpm
+        volumes:
+            - ./src:/src
+        networks:
+            - php-fpm
+
+networks:
+    php-fpm:
+        driver: bridge

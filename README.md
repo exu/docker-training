@@ -74,6 +74,9 @@ What's happen when you're running docker containers?
 - docker starts your image with given `cmd` (last passed parameter in examples
   above)
 
+what is important `run` runs your image in *NEW* container each time you run
+`docker run` command
+
 
 ## Simple first run [Dockerfile](001-simple-dockerfile/Dockerfile)
 
@@ -318,7 +321,7 @@ and more content
 ```
 as we can see after container restart file is not changed
 
-Example - [Dockerfile](060-immutable-images/Dockerfile)
+Example - [Dockerfile](050-immutable-images/Dockerfile)
 
 ## Docker persistance
 
@@ -744,7 +747,27 @@ queried with docker inspect. Such output should be kept short (only the first
 ```
 
 
-## Creating Simple PHP Web application
+## Creating Simple PHP Web application [Dockerfile](030-php-app/Dockerfile)
+
+Create `index.php` file 
+
+``` php
+<?php
+
+echo "<h1 style='color:#ff44dd'>Helloł!!!!</h1>";
+phpinfo();
+```
+
+
+
+``` Dockerfile
+FROM php:7-apache
+
+ADD index.php /var/www/html/
+```
+
+next run build and run our new PHP container
+
 
 ## Getting our container IP address
 
@@ -771,83 +794,14 @@ http://172.17.0.4:8080/allaallalal
 
 
 
-
-### Golang based (app server)
-
-### PHP based application
-
-## Exposing application
-
-
-
-
-
-    
-# Simple web app
-
-## Building inside container
-
-First we build our statically linked `app.go` file:
-
-```
-package main
-
-import (
-	"fmt"
-	"net/http"
-)
-
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hi %s!!", r.URL.Path[1:])
-}
-
-func main() {
-	http.HandleFunc("/", handler)
-	http.ListenAndServe(":8080", nil)
-}
-```
-
-With `go build -o app` You'll receive `app` binary which will be used in our
-docker container. We'll add file inside our container on build
-
-```
-FROM ubuntu:latest
-ADD ./app /srv/app
-CMD /srv/app
-```
-
-```
-docker build -t swa .
-```
-
-We run our container with name
-
-```
-docker run --name=gogo swa
-```
-
-
-Now when we propagate container it'll be freezed inside it.
-
-# Data volumes
-
-I've said on beggining that docker has temporary file system by default.
-But what when you want to store some informations after container will
-be removed?
-
-
-# PHP App with mysql
-
--   First app without compose
-
-# Binding ports
+## Binding ports
 
 - `-P` bind all ports to local machine high ports (from ephemeral port range which typically ranges from 32768 to 61000)
 - `-p 5000` binds port 5000 from container to high port
 - `-p 4900:5000` binds port 5000 from container to 4900 port on local machine
 
 
-# Connection containers - Networking
+## Connections between containers - Networking [Code Example](./061-networking/)
 
 In docker 1.8 and below links between containers was used, You'll need
 to explicitly set link between two containers.
@@ -857,20 +811,9 @@ First create network:
 
     docker network create training1
 
-Then you'll need to pass `--net=training1` to `docker run` command
+Then you'll need to pass `--network=training1` to `docker run` command
 
-
-## Docker compose
-
-When you run `docker-compose --x-networking up` in `myapp` directory, the following happens:
-
-- A network called myapp is created.
-- A container is created using web’s configuration. It joins the network myapp under the name myapp_web_1.
-- A container is created using db’s configuration. It joins the network myapp under the name myapp_db_1.
-
-
-# Localhost integration (--net=host)
-
+You can also run container as part of your local network (`--net=host`)
 
 # Pushing your image to public
 
@@ -904,31 +847,16 @@ docker push
 ```
 
 
-# Your images are too big (could be > 700MB per image)
 
-You can use micro base images:
+# Docker compose
 
-- `phusion/baseimage` ~6MB with apt-get based on ubuntu lts. with init process
-- `gliderlabs/alpine` ~ 5MB base image
+When you run `docker-compose --x-networking up` in `myapp` directory, the following happens:
 
-
-# playing with Docker-compose scale
-  
-# Scaling single-core apps with static docker config
-
-- http://blog.hypriot.com/post/docker-compose-nodejs-haproxy/
+- A network called myapp is created.
+- A container is created using web’s configuration. It joins the network myapp under the name myapp_web_1.
+- A container is created using db’s configuration. It joins the network myapp under the name myapp_db_1.
 
 
-
-# Useful images
-
-* Consul
-  - https://hub.docker.com/r/voxxit/consul/
-  - old: https://hub.docker.com/r/progrium/consul/
-* Registrator
-  - http://gliderlabs.com/registrator/latest/user/quickstart/
-* PHP
-* Webservers / Load balancers
 
 
 
