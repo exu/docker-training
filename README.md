@@ -815,9 +815,27 @@ Then you'll need to pass `--network=training1` to `docker run` command
 
 You can also run container as part of your local network (`--net=host`)
 
-# Pushing your image to public
+# Pushing your images 
 
-Get your image id
+We'll use in this example public repo from https://hub.docker.com 
+To publish on dokcer hub we need to create account. 
+
+Next login to hub and publish your image:
+
+```
+$ docker login 
+Login with your Docker ID to push and pull images from Docker Hub. If you don't have a Docker ID, head over to https://hub.docker.com to create one.
+Username: ex00
+Password: 
+WARNING! Your password will be stored unencrypted in /home/exu/snap/docker/423/.docker/config.json.
+Configure a credential helper to remove this warning. See
+https://docs.docker.com/engine/reference/commandline/login/#credentials-store
+
+Login Succeeded
+
+```
+
+Get your image id:
 
 ```
 docker images | less
@@ -826,38 +844,78 @@ docker images | less
 
 Make tag
 
-```
-                              docker hub username
-                            /      repo name
-                           /     /    tag name
-                          /     /   /
+``` sh
+# docker tag SOURCE_IMAGE[:TAG] TARGET_IMAGE[:TAG]
+# 
+#                              docker hub username
+#                            /      repo name
+#                           /     /    tag name
+#                          /     /   /
 docker tag e701985f4a8c ex00/emacs:v1
-               \
-                image id
-
-
+#               \
+#                image id or tag/name given on build
 ```
 
-Login to hub and publish your image
 
-```
-docker login --username=ex00 --email=jacek.wysocki@gmail.com
-
-docker push
+``` sh
+docker push ex00/emacs:v1
 ```
 
 
 
-# Docker compose
 
-When you run `docker-compose --x-networking up` in `myapp` directory, the following happens:
+# Docker Compose
 
-- A network called myapp is created.
-- A container is created using web’s configuration. It joins the network myapp under the name myapp_web_1.
-- A container is created using db’s configuration. It joins the network myapp under the name myapp_db_1.
+Compose is a tool for defining and running multi-container Docker applications.
+With Compose, you use a YAML file to configure your application’s services.
+Then, with a single command, you create and start all the services from your
+configuration.
 
 
+## Example - PHP app with Redis [Example](./101-compose-app/)
 
+Docker compose files are created in YAML format
+
+``` yaml
+version: '3'
+services:
+  web:
+    build: .
+    ports:
+      - "8080:80"
+  redis:
+    image: "redis:alpine"
+```
+
+`build: .` will use `Dockerfile in current directory`
+
+Our `Dockerfile` will install Redis extension and add `index.php` file 
+
+In index file we'll define Redis as session save handler.
+
+``` php
+ini_set('session.save_handler', 'redis');
+ini_set('session.save_path', 'tcp://redis:6379,tcp://redis:6379');
+
+session_name('FOOBAR');
+session_start();
+
+if (!array_key_exists('visit', $_SESSION)) {
+    $_SESSION['visit'] = 0;
+}
+$_SESSION['visit']++;
+
+echo nl2br('You have been here ' . $_SESSION['visit'] . ' times.');
+```
+
+
+With such application defined we can run 
+
+``` sh
+docker-compose up
+```
+
+Which builds, (re)creates, starts, and attaches to containers for a service.
 
 
 
