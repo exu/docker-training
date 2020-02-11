@@ -24,7 +24,7 @@ Docker parts:
 [![img](res/docker-training-containers.png)](res/docker-training-containers.png)
 
 
-
+- Additionally whole ecosystem (container registries, schedulers) is also helpful
 
 
 
@@ -61,7 +61,7 @@ example:
 
 run ubuntu with sth..
 
-```
+``` sh
 docker run ubuntu cat /etc/passwd
 docker run ubuntu apt-get
 docker run -it ubuntu /bin/bash
@@ -76,6 +76,20 @@ What's happen when you're running docker containers?
 
 what is important `run` runs your image in *NEW* container each time you run
 `docker run` command
+
+
+## Excercise
+
+Run several containers on your machine
+
+``` sh
+docker run ubuntu ls -la
+docker run -it ubuntu /bin/bash
+docker run alpine ls -la
+docker run php:cli php -r 'print_r(["some"=>"var"]);'
+docker run composer
+```
+
 
 
 ## Simple first run [Dockerfile](001-simple-dockerfile/Dockerfile)
@@ -179,6 +193,23 @@ Next check `docker images` command to check image size:
 $ docker images | head -n 5
 ```
 
+## Excercise
+
+``` 
+  ____ _____   __  _            _ 
+ |  _ \_ _\ \ / / | |_ __ _ ___| | __
+ | | | | | \ V /  | __/ _` / __| |/ /
+ | |_| | |  | |   | || (_| \__ \   < 
+ |____/___| |_|    \__\__,_|___/_|\_\
+```
+
+Create `Dockerfile` which will get latest currency rates on 
+run https://api.frankfurter.app/latest
+You can use curl, wget, or whatever is ok for you.
+
+DoD: 
+- image as small as possible
+- docker run should return json response
 
 
 ## Long running processes in Docker
@@ -257,6 +288,34 @@ e.g.
 ``` sh
 $ docker exec -it tailer /bin/sh
 ```
+
+
+## Excercise 
+
+``` 
+  ____ _____   __  _            _ 
+ |  _ \_ _\ \ / / | |_ __ _ ___| | __
+ | | | | | \ V /  | __/ _` / __| |/ /
+ | |_| | |  | |   | || (_| \__ \   < 
+ |____/___| |_|    \__\__,_|___/_|\_\
+```
+
+Copy your previous container (or create new one) 
+
+Change your API to sth like this: 
+
+https://api.countapi.xyz/hit/pandagroupco/docker
+
+
+Create second container which will listen for your hits
+
+https://api.countapi.xyz/get/pandagroupco/docker
+
+DoD:
+- run it in loop 
+- make interval of 1 second with `sleep 1`
+
+
 
 ## Docker containers are immutable 
 
@@ -375,7 +434,7 @@ $ docker volume inspect myvol
 ]
 ```
 
-- rm created volume
+- remove created volume
 ``` sh
 $ docker volume rm myvol 
 
@@ -446,6 +505,24 @@ There are many drivers for volumes, you can even use S3 or GCS
 - https://docs.docker.com/registry/storage-drivers/gcs/
 
 
+
+## Excercise
+``` 
+  ____ _____   __  _            _ 
+ |  _ \_ _\ \ / / | |_ __ _ ___| | __
+ | | | | | \ V /  | __/ _` / __| |/ /
+ | |_| | |  | |   | || (_| \__ \   < 
+ |____/___| |_|    \__\__,_|___/_|\_\
+```
+
+Get your previous API example, modify it to write data into your local
+filesystem. Use bind mounts. (`-v` flag)
+
+DoD: 
+- write each call to API to file with  `>> some_file.txt` after API call
+- file need to be persisted after container restart
+
+
 ## `Dockerfile` reference 
 
 We've learned several Dockerfile instructions in previous examples. But
@@ -474,7 +551,7 @@ How to limit your build context? Simply use `.dockerignore` file, it's working l
 directories like caches, intermediate build files or temporary directories.
 
 
-
+  
 ## Dockerfile commands 
 
 Docker file is based on instructions (you've seen them above of this document)
@@ -730,6 +807,7 @@ queried with docker inspect. Such output should be kept short (only the first
 4096 bytes are stored currently).
 
 
+## Dockerfile good practices
 
 
 
@@ -815,6 +893,30 @@ Then you'll need to pass `--network=training1` to `docker run` command
 
 You can also run container as part of your local network (`--net=host`)
 
+
+## Docker multi stage builds 
+
+Before version 17 if we wanted to make smaller images we need clear 
+our build images from unnecessary stuff on for production builds, 
+or split build and production images build. 
+
+From version 17.05 we can make our life a lot simplier with use of 
+multi-stage builds
+
+I've prepared 2 examples of multi stage builds: 
+First will be based on compiled go based image (but mechanics will be the same
+for almost all modern compiled languages like Java, Rust, Kotlin, Clojure, C#
+etc)
+
+- [Golang based multi stage build](./080-multi-stage-builds/golang/)
+
+Second one is for use with nodejs based build of Vue frontend application
+
+- [Vue based multi stage build](./080-multi-stage-builds/vue/)
+
+
+
+
 # Pushing your images 
 
 We'll use in this example public repo from https://hub.docker.com 
@@ -863,7 +965,6 @@ docker push ex00/emacs:v1
 
 
 
-
 # Docker Compose
 
 Compose is a tool for defining and running multi-container Docker applications.
@@ -872,7 +973,7 @@ Then, with a single command, you create and start all the services from your
 configuration.
 
 
-## Example - PHP app with Redis [Example](./101-compose-app/)
+## Compose Example - PHP app with Redis [Example](./101-compose-app/)
 
 Docker compose files are created in YAML format
 
@@ -919,94 +1020,104 @@ Which builds, (re)creates, starts, and attaches to containers for a service.
 
 
 
+
+## Docker Compose file reference
+
+### `build` configuration
+
+We use build for our custom containers
+
+``` docker-compose.yaml
+version: "3.7"
+services:
+  webapp:
+    build:
+      context: ./dir
+      dockerfile: Dockerfile-alternate
+      args:
+        buildno: 1
+      labels:
+        maintainer: docker@pandagroup.co
+      shm_size: '2gb'
+```
+
+
+- `context` build context path
+- `dockerfile` - path of Dockerfile
+- `shm_size` - temporary `/dev/shm` size in container
+
+### `image` when we want to load image form docker hub
+
+
+## How to run Magento
+
+https://hub.docker.com/r/bitnami/magento/ 
+
+Bitnami prepared docker images for magento (we can try to run them after)
+Because it's more complicated and uses docker compose we can try to run 
+it after trying Docker Compose.
+
+
+## Useful containers: 
+
+### Elastic - official image
+
+https://hub.docker.com/_/elasticsearch
+
+
+Lets run it on our host (`--net host`)
+
+``` sh
+docker run -d --rm --name elasticsearch --net host -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elasticsearch:7.5.2
+```
+
+now we can check if it's working ok.
+
+``` sh
+curl localhost:9200 
+# post something
+curl -H Content-Type:application/json -d '{"name":"Panda"}' localhost:9200/index/create/logs 
+```
+
+
+### Composer / dealing with fs as user
+
+https://hub.docker.com/_/composer 
+
+By default docker runs it's images as root user (uid:1 gid:1) but when 
+we're dealing with project directory we often want to work on files with 
+current user
+
+``` sh
+docker run --rm -it -v $(pwd):/app --user $(id -u):$(id -g) composer install
+```
+
+with `--user` flag we can override default (root) user and group when 
+interacting with files
+
+`composer` is the composer image (with `composer` binary entrypoint)
+`install` is composers command 
+
+
+
+### Magento 
+
+https://hub.docker.com/r/bitnami/magento/ 
+
+Bitnami prepared docker images for magento (we can try to run them after)
+Because it's more complicated and uses docker compose we can try to run 
+it after trying Docker Compose.
+
+
+
+
+# Tools 
+
+- https://github.com/wagoodman/dive - Dockerfile layers explorer
+
 # Scheduling
 
+## Swarm 
 
-## Docker Swarm Mode! from version 1.12 available as part of docker
+## Kubernetes
 
-### What is Swarm
-
-Docker Swarm is cluster manager and container scheduler, it is responsible
-for puting given container instance on apropriate cluster node.
-
-Imagine some web application...
-
-Imagine that we have 10 nodes cluster, to simplfy let's say that each node
-have two processor cores and 4GB of RAM.
-
-Imagine also that your application have some kind of long running worker which
-is responsible for sending emails
-
-You have ~ 1 000 000 users
-
-Almost all users are using your app on monday so your app servers are overloaded
-
-Your users are sending emails each friday for their friends inside applications so your
-workers are screaming for more processor power
-
-Your job is to minimize cost, you can do it manually, each friday put several worker processes more
-to each workers node where they can fight for resources with other.
-
-On monday You'll check if any of workers instances are in idle mode and you can kill them (probably
-with use of some kind of admin panel. And spawn more www processes which can fight for resources.
-
-When you add more nodes it'll be more complicated.
-
-
-Here comes swarm (or kubernetes) to help Us
-
-Swarm organize your machine in cluster, is doing load balancing of your apps for You. You are able to
-put your containerized app to your cluster and swarm will run it where there are resources
-available.
-
-Swarm
-
-Terms:
-- A swarm is a cluster of Docker Engines where you deploy services
-- A node is an instance of the Docker Engine participating in the swarm.
-- A service is the definition of the tasks to execute on the worker nodes. It is the central structure of the swarm system and the primary root of user interaction with the swarm.
-- A task carries a Docker container and the commands to run inside the container
-
-
-- Cluster management integrated with Docker Engine: Use the Docker Engine CLI to create a Swarm of Docker Engines where you can deploy application services. You don’t need additional orchestration software to create or manage a Swarm.
-
-- Decentralized design: Instead of handling differentiation between node roles at deployment time, the Docker Engine handles any specialization at runtime. You can deploy both kinds of nodes, managers and workers, using the Docker Engine. This means you can build an entire Swarm from a single disk image.
-
-- Declarative service model: Docker Engine uses a declarative approach to let you define the desired state of the various services in your application stack. For example, you might describe an application comprised of a web front end service with message queueing services and a database backend.
-
-- Scaling: For each service, you can declare the number of tasks you want to run. When you scale up or down, the swarm manager automatically adapts by adding or removing tasks to maintain the desired state.
-
-- Desired state reconciliation: The swarm manager node constantly monitors the cluster state and reconciles any differences between the actual state your expressed desired state. For example, if you set up a service to run 10 replicas of a container, and a worker machine hosting two of those replicas crashes, the manager will create two new replicas to replace the ones that crashed. The swarm manager assigns the new replicas to workers that are running and available.
-
-- Multi-host networking: You can specify an overlay network for your services. The swarm manager automatically assigns addresses to the containers on the overlay network when it initializes or updates the application.
-
-- Service discovery: Swarm manager nodes assign each service in the swarm a unique DNS name and load balances running containers. You can query every container running in the swarm through a DNS server embedded in the swarm.
-
-- Load balancing: You can expose the ports for services to an external load balancer. Internally, the swarm lets you specify how to distribute service containers between nodes.
-
-- Secure by default: Each node in the swarm enforces TLS mutual authentication and encryption to secure communications between itself and all other nodes. You have the option to use self-signed root certificates or certificates from a custom root CA.
-
-- Rolling updates: At rollout time you can apply service updates to nodes incrementally. The swarm manager lets you control the delay between service deployment to different sets of nodes. If anything goes wrong, you can roll-back a task to a previous version of the service.
-
-
-
-### @TODO Demo time!
-
-#### creating new servers
-
-#### adding nodes to cluster
-
-#### build service
-
-#### deploy service to cluster
-
-#### howto schedule
-
-
-
-
-# Kubernetes
-
-Kubernetes is an open-source platform for automating deployment, scaling, and operations of application containers across clusters of hosts.
-
-It comes from Google.
