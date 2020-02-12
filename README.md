@@ -42,6 +42,10 @@ Docker parts:
           \____\______/
 ```
 
+We'll go over most useful commands of docker but you need to know that there is
+a lot more than those was shown here:
+https://docs.docker.com/engine/reference/commandline/docker/
+
 ## Docker Repositories
 
 There is huge containers repository with official and unofficial images,
@@ -1171,9 +1175,191 @@ it after trying Docker Compose.
 - `docker run --rm -i hadolint/hadolint < Dockerfile`
 
 
-# Scheduling
 
-## Swarm 
+# Scheduling - Swarm 
+
+The cluster management and orchestration features embedded in the Docker Engine
+are built using swarmkit. Swarmkit is a separate project which implements
+Docker’s orchestration layer and is used directly within Docker.
+
+Swarm components:
+
+- Manager node
+- Worker nodes
+- Services 
+- Tasks 
+- Load balancing
+- DNS 
+
+## Swarm deployment example
+
+
+### Initializing cluster 
+
+We'll use single node swarm. 
+
+``` sh
+docker swarm init
+```
+
+this command initializes our swarm cluster (for purpose of this training it'll
+be single node cluster)
+
+After creating it gives ou token to join this swarm cluster with given token 
+and IP
+
+``` sh
+docker swarm join --token SWMTKN-1-6cmxpy48rn6feubpdbn4fpc28jteeapphxjfvkwcl9r12gpbi3-9z19thzamak06ix8mcho77uh5 192.168.1.64:2377
+```
+
+you can check if there is Swarm active with `docker info` command 
+
+You can list available nodes in swarm with:
+``` sh
+docker node ls 
+
+# it give you nodes info 
+ID                            HOSTNAME            STATUS              AVAILABILITY        MANAGER STATUS      ENGINE VERSION
+l67gorvk2wzys09rcbey2d5a1 *   ion-cannon          Ready               Active              Leader              18.09.9
+```
+
+
+### Create service 
+
+Now we're ready to craete a service:
+
+``` sh
+docker service create --replicas 1 --name helloswarm alpine ping pandagroup.co
+```
+
+We can inspect created service with 
+
+``` sh
+docker service inspect --pretty helloswarm
+```
+
+You can also check whats going on in given service (it could be a lot more
+complicated than in this example)
+
+``` sh
+docker service ps helloswarm
+```
+
+
+### Scaling services 
+
+Currently there is only one instance but we can create a lot more 
+When we scale up our containers it's scheduler main task to push those
+containers to given nodes in swarm, it'll try to put next instance to node best
+suited to deployment
+
+``` sh
+docker service scale helloswarm=5
+```
+
+check again with ps there will be a lot more instances running 
+
+### Getting logs from containers 
+
+If you can check STDOUT/ERR of running containers you can 
+do it with: 
+
+``` sh
+docker service logs helloswarm
+```
+
+### Removing service 
+
+``` sh
+docker service rm helloswarm
+```
+
+
+## Swarm rolling updates
+
+Usually you want to limit downtime of your services, in VPSes we're often doing
+some fancy deployment techniqes using different tools like switching DNS entries
+to new VPS etc, switching symlinks on given machine etc. 
+
+In Swarm we have rolling updates which are helping us to limit downtimes of our
+services 
+
+Let's crate example redis cluster (3 nodes) in some version (let it be 3.0.6)
+and after that we'll do upgrade of it to new version (let it be 3.0.7)
+
+``` sh
+docker service create \
+  --replicas 3 \
+  --name redis \
+  --update-delay 10s \
+  redis:3.0.6
+```
+
+let's check this service: 
+
+``` sh
+docker service inspect --pretty redis
+```
+
+now let's upgrade it 
+
+``` sh
+docker service update --image redis:3.0.7 redis
+```
+
+The scheduler applies rolling updates as follows by default:
+1. Stop the first task.
+2. Schedule update for the stopped task.
+3. Start the container for the updated task.
+4. If the update to a task returns RUNNING, wait for the specified delay period then start the next task.
+5. If, at any time during the update, a task returns FAILED, pause the update.
+
+
+When something is not working properly you can always rollback service 
+
+``` sh
+docker service update \
+  --rollback \
+  --update-delay 0s
+  redis
+```
+
+### Network 
+
+Swarm use load balancers on each node to forward traffic to given containers
+You can put external load balancer (like HAProxy/Nginx or other LB) to forwand
+traffic to nodes
+
+![Ingress LB](res/ingress-lb.png)
+
+
+Let's assume you have 100 nodes cluster and you'll run 3-task 
+nginx based service 
+
+``` sh
+docker service create --name my_web \
+                        --replicas 3 \
+                        --publish published=8080,target=80 \
+                        nginx
+```
+
+You don't need to know on which node Swarm scheduled your containers swarm load
+balancers are responsible for it. 
+
+
+### Other useful options when running services 
+
+- `--mode` - default `replicated` - you can set to `global` then each node will
+  receive instance of service 
+- `--reserve-memory` and `--reserve-cpu`
+
+- `--constraint node.labels.region==east` - where to place service
+- `--placement-pref` opossite to constraint
+While placement constraints limit the nodes a service can run on, placement
+preferences try to place tasks on appropriate nodes in an algorithmic way
+
+- `--mount` adds volumes or bind mounts
 
 ## Kubernetes
 
+It's a lot more complicated that Swarm.
