@@ -2,7 +2,7 @@
 
 ## Docker architecture
 
-[![img](res/docker-architecture.svg)](res/docker-architecture.svg)
+[![img](res/docker-architecture.png)](res/docker-architecture.png)
 
 Docker parts: 
 - *Docker daemon* - manages docker objects
